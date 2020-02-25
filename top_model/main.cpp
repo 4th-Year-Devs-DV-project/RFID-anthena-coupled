@@ -29,6 +29,7 @@
 
 #include "../atomics/rfid.hpp"
 #include "../atomics/blinky.hpp"
+#include "../atomics/transmitter.hpp"
 
 
 //const char* D11;
@@ -94,7 +95,7 @@ int main(int argc, char ** argv) {
   /********************************************/
   /***************** blinky *******************/
   /********************************************/
-printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \n");
+
 
   //AtomicModelPtr blinky1 = cadmium::dynamic::translate::make_dynamic_atomic_model<Blinky, TIME>("blinky1");
 
@@ -106,25 +107,22 @@ printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \n");
   /********************************************/
   /********* DigitalOutput1 *******************/
   /********************************************/
-  AtomicModelPtr digitalOutput1 = cadmium::dynamic::translate::make_dynamic_atomic_model<DigitalOutput, TIME>("digitalOutput1", LED1);
+  //AtomicModelPtr digitalOutput1 = cadmium::dynamic::translate::make_dynamic_atomic_model<DigitalOutput, TIME>("digitalOutput1", LED1);
 
-printf("before \n");
- //AtomicModelPtr rfid1 = cadmium::dynamic::translate::make_dynamic_atomic_model<DigitalInput, TIME>("rfid1", BUTTON1);
- AtomicModelPtr rfid1 = cadmium::dynamic::translate::make_dynamic_atomic_model<Rfid, TIME>("rfid1", D11, D12, D13, D10, D8);
-  // AtomicModelPtr rfid1 = cadmium::dynamic::translate::make_dynamic_atomic_model<Rfid, TIME>("rfid1");
-
-printf("afterrrrrrrrr \n");
+  AtomicModelPtr transmitter1 = cadmium::dynamic::translate::make_dynamic_atomic_model<transmitter, TIME>("transmitter1", D11, D12, D3, D15,D14,D9);
+ printf("before \n");
+ AtomicModelPtr rfid1 = cadmium::dynamic::translate::make_dynamic_atomic_model<Rfid, TIME>("rfid1", PB_15, PB_14, D6, D10, D8);
 
   /************************/
   /*******TOP MODEL********/
   /************************/
   cadmium::dynamic::modeling::Ports iports_TOP = {};
   cadmium::dynamic::modeling::Ports oports_TOP = {};
-  cadmium::dynamic::modeling::Models submodels_TOP =  {rfid1, digitalOutput1};
+  cadmium::dynamic::modeling::Models submodels_TOP =  {rfid1, transmitter1};
   cadmium::dynamic::modeling::EICs eics_TOP = {};
   cadmium::dynamic::modeling::EOCs eocs_TOP = {};
   cadmium::dynamic::modeling::ICs ics_TOP = {
-    cadmium::dynamic::translate::make_IC<rfid_defs::dataOut, digitalOutput_defs::in>("rfid1","digitalOutput1")
+    cadmium::dynamic::translate::make_IC<rfid_defs::dataOut, transmitter_defs::in>("rfid1","transmitter1")
     //cadmium::dynamic::translate::make_IC<rfid_defs::dataOut, blinky_defs::in>("rfid1", "blinky1")
     //cadmium::dynamic::translate::make_IC<digitalInput_defs::out, blinky_defs::in>("rfid1", "blinky1")
   };
@@ -137,11 +135,10 @@ printf("afterrrrrrrrr \n");
     eocs_TOP,
     ics_TOP
   );
-printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \n");
 
   ///****************////
-  cadmium::dynamic::engine::runner<NDTime, logger_top> r(TOP, {0});
-  r.run_until(NDTime("00:10:00:000"));
+  cadmium::dynamic::engine::runner<NDTime, log_all> r(TOP, {0});
+  r.run_until(NDTime("01:00:00:000"));
   #ifndef RT_ARM_MBED
     return 0;
   #endif
